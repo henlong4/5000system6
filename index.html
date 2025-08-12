@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>가보자 5000 예언 시스템</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        /* 공통 스타일 */
+        body {
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            background-image: linear-gradient(to bottom right, #071026, #081226);
+            box-sizing: border-box;
+            gap: 24px;
+        }
+        .app-container {
+            width: 100%;
+            max-width: 980px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* 악마의 바카라 예언자 CSS */
+        .baccarat-app .content-wrapper {
+            width: 100%;
+            background-color: white;
+            border-radius: 1rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            padding: 1.5rem;
+            text-align: center;
+            border: 4px solid #b91c1c;
+            color: #374151;
+        }
+        .baccarat-app .title {
+            font-size: 2.25rem;
+            font-weight: 800;
+            margin-bottom: 1.5rem;
+            color: #b91c1c;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+        }
+        .baccarat-app .title-icon { font-size: 3rem; }
+        .baccarat-app .predict-button-container { margin-top: 1.5rem; margin-bottom: 1.5rem; display: flex; justify-content: center; }
+        .baccarat-app .predict-button {
+            width: 100%;
+            padding: 0.75rem 1.5rem;
+            background-image: linear-gradient(to right, #dc2626, #991b1b);
+            color: white;
+            font-weight: bold;
+            font-size: 1.125rem;
+            border: none;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .baccarat-app .predict-button:hover { background-color: #991b1b; transform: scale(1.05); }
+        .baccarat-app .predict-button:active { background-color: #7f1d1d; }
+        .baccarat-app .dice-display {
+            border: 1px solid #d1d5db;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            background-color: #f9fafb;
+            margin-bottom: 1rem;
+            min-height: 3rem;
+            max-height: 6rem;
+            overflow-y: auto;
+            box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.05);
+        }
+        .baccarat-app .dice-display-title { margin: 0 0 0.25rem 0; font-size: 1rem; font-weight: 500; color: #dc2626; }
+        .baccarat-app .dice-output-text { margin: 0; font-size: 1rem; word-break: break-all; color: #374151; }
+        .baccarat-app .result-display {
+            font-size: 3.75rem;
+            font-weight: 800;
+            color: #111827;
+            margin-bottom: 1.5rem;
+        }
+        .baccarat-app .result-icon { font-size: 5rem; }
+        .baccarat-app .summary-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+            color: #1f2937;
+        }
+        .baccarat-app .summary-box {
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+        }
+        .baccarat-app .total-count-box { background-color: #dbeafe; }
+        .baccarat-app .results-summary-box {
+            background-color: #f3f4f6;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        .baccarat-app .summary-title { font-size: 1.125rem; font-weight: 600; margin-bottom: 0.5rem; }
+        .baccarat-app .summary-value { font-size: 1.5rem; font-weight: bold; }
+        .baccarat-app .total-count-value { color: #1d4ed8; }
+        .baccarat-app .summary-details {
+            font-size: 1.25rem;
+            font-weight: bold;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 0.5rem 1rem;
+        }
+        .baccarat-app .banker-text { color: #15803d; }
+        .baccarat-app .player-text { color: #7e22ce; }
+        .baccarat-app .tie-text { color: #ca8a04; }
+        .baccarat-app .controls-container {
+            margin-top: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+        .baccarat-app .control-button {
+            flex: 1;
+            padding: 0.75rem 1.5rem;
+            font-weight: bold;
+            font-size: 1.125rem;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            background-color: transparent;
+        }
+        .baccarat-app .control-button:disabled { opacity: 0.5; cursor: not-allowed; transform: none; background-color: transparent; }
+        .baccarat-app .back-button { border: 2px solid #2563eb; color: #2563eb; }
+        .baccarat-app .back-button:not(:disabled):hover { background-color: #dbeafe; transform: scale(1.05); }
+        .baccarat-app .reset-button { border: 2px solid #dc2626; color: #dc2626; }
+        .baccarat-app .reset-button:hover { background-color: #fee2e2; transform: scale(1.05); }
+        @media (min-width: 640px) {
+            .baccarat-app .content-wrapper { padding: 1.5rem; }
+            .baccarat-app .title { font-size: 2.25rem; }
+            .baccarat-app .predict-button { width: auto; }
+            .baccarat-app .summary-grid { grid-template-columns: 1fr 1fr; }
+            .baccarat-app .total-count-box { grid-column: span 1; }
+            .baccarat-app .results-summary-box { grid-column: span 1; }
+            .baccarat-app .controls-container { flex-direction: row; gap: 1rem; }
+        }
+
+        /* 가따후 5000 system CSS */
+        :root{--bg:#0f1724;--card:#0b1220;--accent:#7dd3fc;--muted:#9aa6b2;--glass: rgba(255,255,255,0.03)}
+        .gattahu-app *{box-sizing:border-box}
+        .gattahu-app{color:#e6eef6;}
+        .gattahu-app .app{width:100%; max-width:980px}
+        .gattahu-app header{display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap: wrap;}
+        .gattahu-app h1{margin:0;font-size:20px; color: #facc15;}
+        .gattahu-app .card{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)); border:1px solid rgba(255,255,255,0.04); padding:18px; border-radius:12px; box-shadow: 0 6px 30px rgba(2,6,23,0.6)}
+        .gattahu-app .grid{display:grid; grid-template-columns: 1fr; gap:12px; margin-top:12px}
+        .gattahu-app .panel{padding:14px}
+        .gattahu-app .status{display:flex; gap:12px; align-items:center}
+        .gattahu-app .big{font-size:28px; font-weight:600}
+        .gattahu-app .muted{color:var(--muted)}
+        .gattahu-app .controls{display:flex; gap:8px; margin-top:12px; flex-wrap: wrap;}
+        .gattahu-app button{background:var(--accent); color:#052025; border:0; padding:10px 14px; border-radius:10px; font-weight:600; cursor:pointer; flex-grow: 1; min-width: 80px;}
+        .gattahu-app button.lose{background:transparent; color:#fca5a5; border:1px solid rgba(255,255,255,0.06)}
+        .gattahu-app .log{height:200px; overflow:auto; background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.00)); border-radius:10px; padding:10px; border:1px solid rgba(255,255,255,0.03)}
+        .gattahu-app .row{display:flex; justify-content:space-between; padding:6px 8px; border-bottom:1px dashed rgba(255,255,255,0.02)}
+        .gattahu-app .small{font-size:12px}
+        .gattahu-app .pill{background:var(--glass); padding:6px 10px; border-radius:999px; font-weight:600}
+        .gattahu-app .footer{margin-top:12px; display:flex; gap:8px; justify-content:space-between; align-items:center; flex-wrap: wrap;}
+        .gattahu-app .hint{font-size:12px; color:var(--muted)}
+        .gattahu-app input[type=number]{width:100px;padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:inherit}
+        .gattahu-app .big-button { padding: 16px 24px; font-size: 1em; }
+        .gattahu-app .disclaimer { margin-top: 16px; font-size: 12px; color: #fca5a5; text-align: center; }
+        .gattahu-app .controls .start-unit-wrapper { 
+            display: flex; 
+            gap: 8px; 
+            align-items: center; 
+            flex-grow: 1; 
+            justify-content: flex-end; 
+        }
+        /* 시작 유닛과 입력 필드 크기를 키우기 위한 수정 */
+        .gattahu-app .controls .start-unit-wrapper input {
+            width: 80px; /* 입력 필드 너비 증가 */
+            padding: 12px; /* 패딩 증가 */
+            font-size: 18px; /* 글꼴 크기 증가 */
+        }
+        .gattahu-app .controls .start-unit-wrapper label {
+            font-size: 16px; /* 라벨 글꼴 크기 증가 */
+            min-width: 80px;
+        }
+        .gattahu-app .log-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; }
+        .gattahu-app .log-header > div { min-width: 100%; }
+    </style>
+</head>
+<body>
+
+    <div class="app-container baccarat-app">
+        <div class="content-wrapper">
+            <h1 class="title">
+                <span class="title-icon">🧿</span> 악마의 바카라 예언자
+            </h1>
+
+            <div class="dice-display">
+                <p class="dice-display-title">🎲 악마의 조언 코드:</p>
+                <p id="baccarat-dice-output" class="dice-output-text">아직 예언되지 않음</p>
+            </div>
+
+            <div class="predict-button-container">
+                <button id="baccarat-roll-button" class="predict-button">
+                    예언하기
+                </button>
+            </div>
+
+            <div id="baccarat-result-display" class="result-display">
+                <span class="result-icon">👉</span> <span id="baccarat-result-text"></span>
+            </div>
+
+            <div class="summary-grid">
+                <div class="summary-box total-count-box">
+                    <div class="summary-title">총 예언 횟수:</div>
+                    <div id="baccarat-total-count" class="summary-value total-count-value">0</div>
+                </div>
+                <div class="summary-box results-summary-box">
+                    <div class="summary-title">결과 요약:</div>
+                    <div class="summary-details">
+                        <span id="baccarat-banker-summary" class="banker-text">BANKER: 0 (0 연속)</span>
+                        <span id="baccarat-player-summary" class="player-text">PLAYER: 0 (0 연속)</span>
+                        <span id="baccarat-tie-summary" class="tie-text">TIE: 0 (0 연속)</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="controls-container">
+                <button id="baccarat-back-button" class="control-button back-button">
+                    전 단계로
+                </button>
+                <button id="baccarat-reset-button" class="control-button reset-button">
+                    리셋
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <div style="height: 10px;"></div>
+
+    <div class="app-container gattahu-app">
+        <div class="app">
+            <header>
+                <div>
+                    <h1>가따후 5000 system</h1>
+                    <div class="muted small">승/패 버튼으로 진행 — 규칙표(1 → 5000) 반영</div>
+                </div>
+                <div class="pill">만든이: 유리화 (자동 변환)</div>
+            </header>
+
+            <div class="grid">
+                <div class="card panel">
+                    <div class="status">
+                        <div>
+                            <div class="muted small">현재 유닛</div>
+                            <div id="gattahu-current" class="big">1</div>
+                        </div>
+                        <div style="margin-left:8px">
+                            <div class="muted small">이번 베팅</div>
+                            <div id="gattahu-bet" class="big">1</div>
+                        </div>
+                        <div style="margin-left:auto;text-align:right">
+                            <div class="muted small">다음(승)</div>
+                            <div id="gattahu-nextWin" class="big">2</div>
+                            <div class="muted small">다음(패)</div>
+                            <div id="gattahu-nextLose" class="muted small">D</div>
+                        </div>
+                    </div>
+
+                    <div class="controls">
+                        <button id="gattahu-winBtn" class="big-button">승리</button>
+                        <button id="gattahu-loseBtn" class="lose big-button">패배</button>
+                        <button id="gattahu-prevBtn" class="big-button" style="background:transparent;color:#facc15;border:1px solid rgba(250,204,21,0.15)">이전</button>
+                        <button id="gattahu-resetBtn" class="big-button" style="background:transparent;color:#7dd3fc;border:1px solid rgba(125,211,252,0.15)">리셋</button>
+                        <div class="start-unit-wrapper">
+                            <label class="small muted">시작 유닛</label>
+                            <input id="gattahu-startInput" type="number" value="1" min="1" />
+                            <button id="gattahu-setStart" class="big-button" style="background:transparent;border:1px solid rgba(255,255,255,0.04);color:var(--accent)">설정</button>
+                        </div>
+                    </div>
+
+                    <div class="footer">
+                        <div class="hint">* 표시는 특별 단계. D = 패배 시 종료, WIN = 목표 달성</div>
+                        <div style="display:flex;gap:8px; flex-wrap: wrap;">
+                            <button id="gattahu-exportBtn" style="background:transparent;border:1px solid rgba(255,255,255,0.04);color:var(--accent)">CSV 내보내기</button>
+                            <button id="gattahu-clearLog" style="background:transparent;border:1px solid rgba(255,255,255,0.04);color:#fca5a5">히스토리 삭제</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card panel">
+                    <div class="log-header">
+                        <div>
+                            <strong>히스토리</strong>
+                            <div class="muted small">진행 기록 (최신 위)</div>
+                        </div>
+                        <div class="muted small">규칙표 내에서 다음 유닛을 찾습니다</div>
+                    </div>
+
+                    <div id="gattahu-log" class="log"></div>
+                </div>
+            </div>
+            <div class="disclaimer">
+                본 시스템의 이용으로 발생하는 모든 결과에 대한 법적·재정적 책임은 이용자 본인에게 있으며, 운영자는 일체의 법적 책임을 지지 않습니다.
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 악마의 바카라 예언자 스크립트
+        (function() {
+            const rollButton = document.getElementById('baccarat-roll-button');
+            const backButton = document.getElementById('baccarat-back-button');
+            const resetButton = document.getElementById('baccarat-reset-button');
+            const diceOutput = document.getElementById('baccarat-dice-output');
+            const resultText = document.getElementById('baccarat-result-text');
+            const totalCountEl = document.getElementById('baccarat-total-count');
+            const bankerSummaryEl = document.getElementById('baccarat-banker-summary');
+            const playerSummaryEl = document.getElementById('baccarat-player-summary');
+            const tieSummaryEl = document.getElementById('baccarat-tie-summary');
+
+            let state = {
+                dice: [],
+                result: '',
+                count: 0,
+                bankerCount: 0,
+                playerCount: 0,
+                tieCount: 0,
+                consecutiveBanker: 0,
+                consecutivePlayer: 0,
+                consecutiveTie: 0,
+                lastResult: null,
+                bankerBeforeTie: 0,
+                playerBeforeTie: 0,
+            };
+            let history = [];
+
+            const isOdd = (num) => num % 2 === 1;
+            const isEven = (num) => num % 2 === 0;
+
+            const updateUI = () => {
+                diceOutput.textContent = state.dice.length ? state.dice.join(', ') : '아직 예언되지 않음';
+                resultText.textContent = state.result;
+                totalCountEl.textContent = state.count;
+                bankerSummaryEl.textContent = `BANKER: ${state.bankerCount} (${state.consecutiveBanker} 연속)`;
+                playerSummaryEl.textContent = `PLAYER: ${state.playerCount} (${state.consecutivePlayer} 연속)`;
+                tieSummaryEl.textContent = `TIE: ${state.tieCount} (${state.consecutiveTie} 연속)`;
+                backButton.disabled = history.length === 0;
+            };
+
+            const saveStateToHistory = () => {
+                history.push(JSON.parse(JSON.stringify(state)));
+            };
+
+            const rollDice = () => {
+                saveStateToHistory();
+                const newDice = Array.from({ length: 30 }, () => Math.floor(Math.random() * 6) + 1);
+                const oddCount = newDice.filter(isOdd).length;
+                const evenCount = newDice.filter(isEven).length;
+
+                let currentResult = '';
+                if (oddCount > evenCount) {
+                    currentResult = 'BANKER';
+                } else if (evenCount > oddCount) {
+                    currentResult = 'PLAYER';
+                } else {
+                    currentResult = 'TIE';
+                }
+
+                state.dice = newDice;
+                state.result = currentResult;
+                state.count++;
+
+                if (currentResult === 'BANKER') { state.bankerCount++; }
+                else if (currentResult === 'PLAYER') { state.playerCount++; }
+                else { state.tieCount++; }
+
+                if (currentResult === 'TIE') {
+                    state.consecutiveTie++;
+                    if (state.lastResult !== 'TIE') {
+                        state.bankerBeforeTie = state.consecutiveBanker;
+                        state.playerBeforeTie = state.consecutivePlayer;
+                    }
+                } else if (currentResult === 'BANKER') {
+                    state.consecutiveTie = 0;
+                    state.consecutivePlayer = 0;
+                    if (state.lastResult === 'BANKER') { state.consecutiveBanker++; }
+                    else if (state.lastResult === 'TIE') { state.consecutiveBanker = state.bankerBeforeTie + 1; }
+                    else { state.consecutiveBanker = 1; }
+                    state.bankerBeforeTie = 0;
+                    state.playerBeforeTie = 0;
+                } else {
+                    state.consecutiveTie = 0;
+                    state.consecutiveBanker = 0;
+                    if (state.lastResult === 'PLAYER') { state.consecutivePlayer++; }
+                    else if (state.lastResult === 'TIE') { state.consecutivePlayer = state.playerBeforeTie + 1; }
+                    else { state.consecutivePlayer = 1; }
+                    state.bankerBeforeTie = 0;
+                    state.playerBeforeTie = 0;
+                }
+                state.lastResult = currentResult;
+                updateUI();
+            };
+
+            const goBack = () => {
+                if (history.length > 0) {
+                    state = history.pop();
+                    updateUI();
+                }
+            };
+            const resetGame = () => {
+                state = { dice: [], result: '', count: 0, bankerCount: 0, playerCount: 0, tieCount: 0, consecutiveBanker: 0, consecutivePlayer: 0, consecutiveTie: 0, lastResult: null, bankerBeforeTie: 0, playerBeforeTie: 0, };
+                history = [];
+                updateUI();
+            };
+            rollButton.addEventListener('click', rollDice);
+            backButton.addEventListener('click', goBack);
+            resetButton.addEventListener('click', resetGame);
+            updateUI();
+        })();
+
+        // 가따후 5000 system 스크립트
+        (function() {
+            const rules = {
+              "1": {bet:"1", win:2, lose:"D", special:false}, "2": {bet:"2", win:4, lose:"D", special:true}, "3": {bet:"3", win:6, lose:"D", special:false}, "4": {bet:"4", win:8, lose:"D", special:false}, "5": {bet:"3", win:8, lose:2, special:true}, "6": {bet:"3", win:9, lose:3, special:false}, "7": {bet:"2", win:9, lose:5, special:true}, "8": {bet:"3", win:11, lose:5, special:false}, "9": {bet:"2", win:11, lose:7, special:true}, "10": {bet:"3", win:13, lose:7, special:false}, "11": {bet:"2", win:13, lose:9, special:true}, "12": {bet:"1-2", win:15, lose:11, special:true}, "13": {bet:"1", win:14, lose:12, special:true}, "14": {bet:"1-2", win:17, lose:9, special:true}, "15": {bet:"1", win:16, lose:14, special:true}, "16": {bet:"2", win:18, lose:14, special:true}, "17": {bet:"2", win:19, lose:15, special:false}, "18": {bet:"1", win:19, lose:17, special:true}, "19": {bet:"2", win:21, lose:17, special:true}, "20": {bet:"3", win:23, lose:17, special:false}, "21": {bet:"4", win:25, lose:17, special:true}, "22": {bet:"3", win:25, lose:19, special:false}, "23": {bet:"3", win:26, lose:20, special:false}, "24": {bet:"4", win:28, lose:20, special:false}, "25": {bet:"3", win:28, lose:22, special:true}, "26": {bet:"2", win:28, lose:24, special:false}, "27": {bet:"1", win:28, lose:26, special:false}, "28": {bet:"2-4", win:34, lose:22, special:true}, "30": {bet:"2", win:32, lose:28, special:false}, "32": {bet:"4", win:36, lose:28, special:false}, "34": {bet:"4", win:38, lose:30, special:true}, "36": {bet:"2", win:38, lose:34, special:false}, "38": {bet:"4", win:42, lose:34, special:true}, "40": {bet:"6", win:46, lose:34, special:false}, "42": {bet:"6", win:48, lose:36, special:true}, "44": {bet:"4", win:48, lose:40, special:false}, "45": {bet:"3", win:48, lose:42, special:false}, "46": {bet:"2", win:48, lose:44, special:false}, "47": {bet:"1", win:48, lose:46, special:false}, "48": {bet:"6", win:54, lose:42, special:true}, "51": {bet:"6", win:57, lose:45, special:false}, "54": {bet:"3", win:57, lose:51, special:true}, "57": {bet:"6", win:63, lose:51, special:true}, "60": {bet:"9", win:69, lose:51, special:false}, "63": {bet:"9", win:72, lose:54, special:true}, "66": {bet:"9", win:75, lose:57, special:false}, "69": {bet:"6", win:75, lose:63, special:false}, "70": {bet:"10", win:80, lose:60, special:false}, "72": {bet:"3", win:75, lose:69, special:true}, "75": {bet:"5", win:80, lose:70, special:true}, "80": {bet:"10", win:90, lose:70, special:true}, "85": {bet:"10", win:95, lose:75, special:false}, "90": {bet:"5", win:95, lose:85, special:true}, "95": {bet:"10", win:105, lose:85, special:true}, "100": {bet:"15", win:115, lose:85, special:false}, "105": {bet:"15", win:120, lose:90, special:true}, "110": {bet:"15", win:125, lose:95, special:false}, "115": {bet:"10", win:125, lose:105, special:false}, "120": {bet:"5", win:125, lose:115, special:true}, "125": {bet:"5-10", win:140, lose:110, special:true}, "130": {bet:"10-20", win:160, lose:100, special:false}, "140": {bet:"10", win:150, lose:130, special:true}, "150": {bet:"20", win:170, lose:130, special:true}, "160": {bet:"10", win:170, lose:150, special:false}, "170": {bet:"20", win:190, lose:150, special:true}, "180": {bet:"10", win:190, lose:170, special:false}, "190": {bet:"20", win:210, lose:170, special:true}, "200": {bet:"30", win:230, lose:170, special:false}, "210": {bet:"20", win:230, lose:190, special:true}, "220": {bet:"30", win:250, lose:190, special:false}, "230": {bet:"20", win:250, lose:210, special:true}, "240": {bet:"10", win:250, lose:230, special:false}, "250": {bet:"30", win:280, lose:220, special:true}, "260": {bet:"20-40", win:320, lose:200, special:false}, "280": {bet:"20", win:300, lose:260, special:true}, "300": {bet:"40", win:340, lose:260, special:true}, "320": {bet:"20", win:340, lose:300, special:false}, "340": {bet:"40", win:380, lose:300, special:true}, "360": {bet:"20", win:380, lose:340, special:false}, "380": {bet:"40", win:420, lose:340, special:true}, "400": {bet:"20-40", win:460, lose:340, special:false}, "420": {bet:"40", win:460, lose:380, special:true}, "440": {bet:"60", win:500, lose:380, special:false}, "460": {bet:"40", win:500, lose:420, special:true}, "480": {bet:"20", win:500, lose:460, special:false},
+              "500": {bet:"40", win:"540", lose:460, special:true}, "510": {bet:"30", win:540, lose:480, special:false}, "540": {bet:"30", win:570, lose:510, special:true}, "570": {bet:"60", win:630, lose:510, special:true}, "600": {bet:"90", win:690, lose:510, special:false}, "630": {bet:"90", win:720, lose:540, special:true}, "660": {bet:"90", win:750, lose:570, special:false}, "690": {bet:"60", win:750, lose:630, special:false}, "700": {bet:"100", win:800, lose:600, special:false}, "720": {bet:"30", win:750, lose:690, special:true}, "750": {bet:"50", win:800, lose:700, special:true}, "800": {bet:"100", win:900, lose:700, special:true}, "850": {bet:"100", win:950, lose:750, special:false}, "900": {bet:"50", win:950, lose:850, special:true}, "950": {bet:"100", win:1050, lose:850, special:true}, "1000": {bet:"150", win:1150, lose:850, special:false}, "1050": {bet:"150", win:1200, lose:900, special:true}, "1100": {bet:"150", win:1250, lose:950, special:false}, "1150": {bet:"100", win:1250, lose:1050, special:false}, "1200": {bet:"50", win:1250, lose:1150, special:true}, "1250": {bet:"50-100", win:1400, lose:1100, special:true}, "1300": {bet:"100-200", win:1600, lose:1000, special:false}, "1400": {bet:"100", win:1500, lose:1300, special:true}, "1500": {bet:"200", win:1700, lose:1300, special:true}, "1600": {bet:"100", win:1700, lose:1500, special:false}, "1700": {bet:"200", win:1900, lose:1500, special:true}, "1800": {bet:"100", win:1900, lose:1700, special:false}, "1900": {bet:"200", win:2100, lose:1700, special:true}, "2000": {bet:"300", win:2300, lose:1700, special:false}, "2100": {bet:"200", win:2300, lose:1900, special:true}, "2200": {bet:"300", win:2500, lose:1900, special:false}, "2300": {bet:"200", win:2500, lose:2100, special:true}, "2400": {bet:"100", win:2500, lose:2300, special:false}, "2500": {bet:"300", win:2800, lose:2200, special:true}, "2600": {bet:"200-400", win:3200, lose:2000, special:false}, "2800": {bet:"200", win:3000, lose:2600, special:true}, "3000": {bet:"400", win:3400, lose:2600, special:true}, "3200": {bet:"200", win:3400, lose:3000, special:false}, "3400": {bet:"400", win:3800, lose:3000, special:true}, "3600": {bet:"200", win:3800, lose:3400, special:false}, "3800": {bet:"400", win:4200, lose:3400, special:true}, "4000": {bet:"200-400", win:4600, lose:3400, special:false}, "4200": {bet:"400", win:4600, lose:3800, special:true}, "4400": {bet:"600", win:5000, lose:3800, special:false}, "4600": {bet:"400", win:5000, lose:4200, special:true}, "4800": {bet:"200", win:5000, lose:4600, special:false}, "5000": {bet:"WIN", win:"WIN", lose:null, special:true}
+            };
+            let gattahuCurrent = 1;
+            let gattahuHistory = [];
+            const el = {
+              current: document.getElementById('gattahu-current'), bet: document.getElementById('gattahu-bet'), nextWin: document.getElementById('gattahu-nextWin'), nextLose: document.getElementById('gattahu-nextLose'), log: document.getElementById('gattahu-log'), winBtn: document.getElementById('gattahu-winBtn'), loseBtn: document.getElementById('gattahu-loseBtn'), prevBtn: document.getElementById('gattahu-prevBtn'), resetBtn: document.getElementById('gattahu-resetBtn'), startInput: document.getElementById('gattahu-startInput'), setStart: document.getElementById('gattahu-setStart'), exportBtn: document.getElementById('gattahu-exportBtn'), clearLog: document.getElementById('gattahu-clearLog')
+            };
+
+            function render() {
+                el.current.textContent = gattahuCurrent;
+                const rule = rules[String(gattahuCurrent)];
+                if(!rule){ el.bet.textContent = '—'; el.nextWin.textContent = '—'; el.nextLose.textContent = '—'; return; }
+                el.bet.textContent = rule.bet;
+                el.nextWin.textContent = rule.win;
+                el.nextLose.textContent = (rule.lose===null?'-':rule.lose);
+            }
+            function pushHistory(action, from, to, bet, special){
+                const row = {time: new Date().toLocaleString(), action, from, to, bet, special};
+                gattahuHistory.unshift(row);
+                renderLog();
+            }
+            function renderLog(){
+                el.log.innerHTML = gattahuHistory.map(h=>{
+                    const specialMark = h.special?"*":"";
+                    return `<div class="row"><div><div class="small">${h.time} ${specialMark}</div><div><strong>${h.action}</strong> ${h.from} → ${h.to}</div></div><div class="small muted">bet:${h.bet}</div></div>`
+                }).join('');
+            }
+            el.winBtn.addEventListener('click',()=>{
+                const rule = rules[String(gattahuCurrent)];
+                if(!rule){ alert('해당 유닛 규칙이 없습니다.'); return; }
+                const next = rule.win;
+                pushHistory('승리', gattahuCurrent, next, rule.bet, rule.special);
+                if(next === 'WIN'){ gattahuCurrent = 'WIN'; render(); alert('🎉 WIN! 목표 달성했습니다.'); return; }
+                gattahuCurrent = next; render();
+            });
+            el.loseBtn.addEventListener('click',()=>{
+                const rule = rules[String(gattahuCurrent)];
+                if(!rule){ alert('해당 유닛 규칙이 없습니다.'); return; }
+                const next = rule.lose;
+                pushHistory('패배', gattahuCurrent, next, rule.bet, rule.special);
+                if(next === 'D' || next === null){ gattahuCurrent = 'D'; render(); alert('종료: 패배로 인한 종료(D)입니다.'); return; }
+                gattahuCurrent = next; render();
+            });
+            el.prevBtn.addEventListener('click', ()=>{
+                if(gattahuHistory.length === 0){ alert('되돌아갈 기록이 없습니다.'); return; }
+                const lastRecord = gattahuHistory.shift();
+                gattahuCurrent = lastRecord.from; render(); renderLog();
+            });
+            el.resetBtn.addEventListener('click',()=>{
+                gattahuCurrent = Number(el.startInput.value) || 1;
+                gattahuHistory = []; render(); renderLog();
+            });
+            el.setStart.addEventListener('click', ()=>{
+                const v = Number(el.startInput.value);
+                if(!v || !rules[String(v)]){ alert('유효한 시작 유닛을 입력하세요. 예: 1'); return; }
+                gattahuCurrent = v; render();
+            });
+            el.exportBtn.addEventListener('click', ()=>{
+                if(gattahuHistory.length===0){ alert('내보낼 히스토리가 없습니다.'); return; }
+                const csv = ['time,action,from,to,bet,special', ...gattahuHistory.map(h=>`${h.time},${h.action},${h.from},${h.to},${h.bet},${h.special}`)].join('\n');
+                const blob = new Blob([csv], {type:'text/csv'});
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a'); a.href = url; a.download = 'gattahu_history.csv'; a.click(); URL.revokeObjectURL(url);
+            });
+            el.clearLog.addEventListener('click', ()=>{ gattahuHistory=[]; renderLog(); });
+            render();
+        })();
+    </script>
+</body>
+</html>
